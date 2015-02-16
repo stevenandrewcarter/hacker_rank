@@ -28,11 +28,6 @@ struct Point {
   bool valid;
 };
 
-struct MoveOption {
-  Point location;
-  string moveName;
-};
-
 char getGridItem(int x, int y, vector<string> grid) {
   return grid[x][y];
 }
@@ -47,18 +42,6 @@ void iterateGrid(int n, vector<string> grid, function<bool(Point)> func) {
   }
 }
 
-Point getActorPosition(int n, vector<string> grid, char actor) {
-  Point foundActor;
-  iterateGrid(n, grid, [&](Point aPoint) {
-      if (aPoint.content == actor) {
-        foundActor = aPoint;
-        return true;
-      }
-      return false;
-  });
-  return foundActor;
-}
-
 double getDistance(Point source, Point dest) {
   auto x = pow(dest.x - source.x, 2);
   auto y = pow(dest.y - source.y, 2);
@@ -70,14 +53,15 @@ map<double, Point> getDirtLocations(Point botLocation, vector<string> grid) {
   iterateGrid(5, grid, [&](Point aPoint) {
       if (aPoint.content == 'd') {
         auto distance = getDistance(aPoint, botLocation);
-        dirtLocations[distance] = aPoint;
+        if (dirtLocations.find(distance) == dirtLocations.end())
+          dirtLocations[distance] = aPoint;
       }
       return false;
   });
   return dirtLocations;
 }
 
-void calculateMoveOption(int n, vector<string> grid, map<double, MoveOption> &moveOptions, string move, Point currentPosition, Point princessPosition) {
+void calculateMoveOption(int n, map<double, string> &moveOptions, string move, Point currentPosition, Point targetPosition) {
   Point checkPoint;
   if (move == "LEFT" && currentPosition.y > 0)
     checkPoint = Point(currentPosition.x, currentPosition.y - 1, '\0');
@@ -88,13 +72,9 @@ void calculateMoveOption(int n, vector<string> grid, map<double, MoveOption> &mo
   else if (move == "DOWN" && currentPosition.x < n - 1)
     checkPoint = Point(currentPosition.x + 1, currentPosition.y, '\0');
   if (checkPoint.valid) {
-    auto actor = getGridItem(checkPoint.x, checkPoint.y, grid);
-    checkPoint.content = actor;
-    auto distance = getDistance(princessPosition, checkPoint);
-    MoveOption moveOption;
-    moveOption.location = checkPoint;
-    moveOption.moveName = move;
-    moveOptions[distance] = moveOption;
+    auto distance = getDistance(targetPosition, checkPoint);
+    if (moveOptions.find(distance) == moveOptions.end())
+    moveOptions[distance] = move;
   }
 }
 
@@ -111,15 +91,14 @@ void nextMove(int posr, int posc, vector<string> board) {
     return;
   }
   else {
-    auto currentPosition = botLocation;
-    map<double, MoveOption> moveOptions;
+    map<double, string> moveOptions;
     // Test each surrounding point as the movement direction
-    calculateMoveOption(5, board, moveOptions, "LEFT", currentPosition, closestDirtLocation->second);
-    calculateMoveOption(5, board, moveOptions, "RIGHT", currentPosition, closestDirtLocation->second);
-    calculateMoveOption(5, board, moveOptions, "UP", currentPosition, closestDirtLocation->second);
-    calculateMoveOption(5, board, moveOptions, "DOWN", currentPosition, closestDirtLocation->second);
+    calculateMoveOption(5, moveOptions, "LEFT", botLocation, closestDirtLocation->second);
+    calculateMoveOption(5, moveOptions, "RIGHT", botLocation, closestDirtLocation->second);
+    calculateMoveOption(5, moveOptions, "UP", botLocation, closestDirtLocation->second);
+    calculateMoveOption(5, moveOptions, "DOWN", botLocation, closestDirtLocation->second);
     auto bestMove = moveOptions.begin();
-    cout << bestMove->second.moveName << endl;
+    cout << bestMove->second << endl;
   }
 }
 

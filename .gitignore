@@ -46,3 +46,4 @@ Debug
 *.suo
 .idea
 *.sdf
+*.opensdf

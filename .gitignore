@@ -47,3 +47,5 @@ Debug
 .idea
 *.sdf
 *.opensdf
+*.db
+*.user

@@ -7,7 +7,7 @@
 using namespace std;
 
 struct Node {
-  Node() {
+  Node(): x_(0), y_(0), value_(0) {
   }
 
   Node(int x, int y, char value) : x_(x), y_(y), value_(value) {
@@ -52,8 +52,8 @@ void dfs_recursive(int r, int c, Node *current_node, Node *destination_node, map
     dfs_recursive(r, c, &nodes[current_node->x_][current_node->y_ - 1], destination_node, nodes, path);
 
   if (current_node->x_ > 0 && !visited_nodes[current_node->x_ - 1][current_node->y_] && nodes[current_node->x_ - 1][current_node->y_].value_ != '%')
-    dfs_recursive(r, c, &nodes[current_node->x_ - 1][current_node->y_], destination_node, nodes, path);         
-  
+    dfs_recursive(r, c, &nodes[current_node->x_ - 1][current_node->y_], destination_node, nodes, path);
+
   visited_nodes[current_node->x_][current_node->y_] = false;
   if (path.size() > 0) path.pop();
 }
@@ -66,13 +66,13 @@ map<int, map<int, Node>> build_graph(int r, int c, vector<string> grid) {
   return nodes;
 }
 
-void dfs(int r, int c, int pacman_r, int pacman_c, int food_r, int food_c, vector<string> grid) {  
+void dfs(int r, int c, int pacman_r, int pacman_c, int food_r, int food_c, vector<string> grid) {
   auto nodes = build_graph(r, c, grid);
-  stack<Node*> path;  
+  stack<Node*> path;
   for (auto i = 0; i < r; ++i)
     for (auto j = 0; j < c; ++j)
-      visited_nodes[i][j] = false;  
-  dfs_recursive(r, c, &nodes[pacman_r][pacman_c], &nodes[food_r][food_c], nodes, path); 
+      visited_nodes[i][j] = false;
+  dfs_recursive(r, c, &nodes[pacman_r][pacman_c], &nodes[food_r][food_c], nodes, path);
 }
 
 int main(void) {
